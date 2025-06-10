@@ -50,26 +50,18 @@ export default function Navigation() {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
+            <SheetContent side="right" className="w-[300px] px-8">
               <div className="flex flex-col space-y-4 mt-8">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-gray-700 hover:text-emerald-600 transition-colors py-2"
+                    className="text-gray-700 hover:text-emerald-600 transition-colors py-2 px-4"
                     onClick={() => setIsOpen(false)}
                   >
                     {item.label}
                   </Link>
                 ))}
-                <Button
-                  asChild
-                  className="bg-emerald-600 hover:bg-emerald-700 mt-4"
-                >
-                  <Link href="/contact" onClick={() => setIsOpen(false)}>
-                    Get Started
-                  </Link>
-                </Button>
               </div>
             </SheetContent>
           </Sheet>
