@@ -217,13 +217,6 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               asChild
-              size="lg"
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              <Link href="/programs">View Our Programs</Link>
-            </Button>
-            <Button
-              asChild
               variant="outline"
               size="lg"
               className="border-white hover:bg-white hover:text-gray-900 text-gray-700"
