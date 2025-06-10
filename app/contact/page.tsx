@@ -35,9 +35,28 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message! We'll get back to you soon.");
+    
+    // Format the email body
+    const emailSubject = formData.subject ? formData.subject : "General Inquiry from Website";
+    
+    let emailBody = `Name: ${formData.name}\n`;
+    emailBody += `Email: ${formData.email}\n`;
+    
+    if (formData.phone) {
+      emailBody += `Phone: ${formData.phone}\n`;
+    }
+    
+    if (formData.businessType) {
+      emailBody += `Business Type: ${formData.businessType}\n`;
+    }
+    
+    emailBody += `\nMessage:\n${formData.message}`;
+    
+    // Create the mailto link
+    const mailtoLink = `mailto:info@edubusiness.academy?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    
+    // Open the user's email client
+    window.location.href = mailtoLink;
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -237,6 +256,7 @@ export default function ContactPage() {
                     />
                   </div>
 
+                  {/* Submit Button */}
                   <Button
                     type="submit"
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
