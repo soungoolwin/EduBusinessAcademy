@@ -66,7 +66,7 @@ export default function ServicesPage() {
           </h2>
 
           <div className="space-y-8">
-            {/* Business Support & Consulting */}
+            {/* Business Support & Coaching */}
             <Card className="overflow-hidden">
               <div className="md:flex">
                 <div className="md:w-1/3 bg-emerald-100 p-8 flex items-center justify-center">
@@ -86,6 +86,10 @@ export default function ServicesPage() {
                     and capitalize on opportunities.
                   </CardDescription>
                   <ul className="space-y-2 text-gray-600 mb-6">
+                    <li>
+                      • Support Business Matching, Business Exchange based on
+                      each requirements
+                    </li>
                     <li>• Strategic business planning and development</li>
                     <li>• Performance monitoring and analysis</li>
                     <li>• Problem-solving and crisis management</li>
@@ -218,8 +222,10 @@ export default function ServicesPage() {
                   <ul className="space-y-2 text-gray-600 mb-6">
                     <li>• Digital transformation consulting</li>
                     <li>• Technology solution recommendations</li>
+                    <li>• Connecting for technology acquisition.</li>
                     <li>• System implementation support</li>
                     <li>• Digital skills training</li>
+                    <li>• Business Website Development</li>
                   </ul>
                   <Button asChild className="bg-purple-600 hover:bg-purple-700">
                     <Link href="/contact">Explore Tech Solutions</Link>
