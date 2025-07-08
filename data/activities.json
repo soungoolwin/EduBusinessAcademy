@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "slug": "first-first-activity",
+    "title": "First First Activity",
+    "shortDescription": "This is a short description for the first activity.",
+    "longDescription": "This is a longer, more detailed description of the first activity. It can contain multiple paragraphs and rich text formatting if you decide to add a Markdown parser later.",
+    "imageUrl": "/uploads/1751966129623-890418859.jpg"
+  },
+  {
+    "id": "2",
+    "slug": "second-activity",
+    "title": "Second Activity",
+    "shortDescription": "A brief look at our second amazing activity.",
+    "longDescription": "Here we dive deep into the details of the second activity. This is where you can explain the what, why, and how of the event or project.",
+    "imageUrl": "/placeholder.svg"
+  }
+]
