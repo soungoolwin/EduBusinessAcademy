@@ -17,7 +17,9 @@ async function readActivities() {
     const data = await fs.readFile(dataFilePath, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
-    if (error.code === 'ENOENT') return [];
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return [];
+    }
     throw error;
   }
 }
