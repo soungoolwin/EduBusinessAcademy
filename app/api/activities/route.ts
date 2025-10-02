@@ -1,89 +1,100 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { NextResponse } from 'next/server';
-import { NextRequest } from 'next/server';
-
-const dataFilePath = path.join(process.cwd(), 'data/activities.json');
-const uploadsDir = path.join(process.cwd(), 'public/uploads');
-
-// This API route is designed for a local development environment.
-// It writes to the local filesystem, which won't work on read-only hosting.
-// To manage content on a live site, run the app locally, make your changes
-// via the admin dashboard, and then commit the updated `data/activities.json`
-// and `public/uploads` directory to your Git repository.
-
-async function readActivities() {
-  try {
-    const data = await fs.readFile(dataFilePath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
-      return [];
-    }
-    throw error;
-  }
-}
-
-async function writeActivities(data: any) {
-  await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-async function ensureUploadsDirExists() {
-  try {
-    await fs.mkdir(uploadsDir, { recursive: true });
-  } catch (error) {
-    console.error('Could not create uploads directory:', error);
-    throw error;
-  }
-}
+import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { uploadMultipleImagesToBlob } from "@/lib/upload-helper";
 
 export async function GET() {
-  const activities = await readActivities();
-  return NextResponse.json(activities);
+  try {
+    const activities = await prisma.activity.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
+    return NextResponse.json(activities);
+  } catch (error) {
+    console.error("Error fetching activities:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch activities" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
-  await ensureUploadsDirExists();
-  const activities = await readActivities();
-  const formData = await request.formData();
+  try {
+    const formData = await request.formData();
 
-  const title = formData.get('title') as string;
-  const shortDescription = formData.get('shortDescription') as string;
-  const longDescription = formData.get('longDescription') as string;
-  const imageFile = formData.get('image') as File | null;
+    const title = formData.get("title") as string;
+    const shortDescription = formData.get("shortDescription") as string;
+    const longDescription = formData.get("longDescription") as string;
+    const imageFiles = formData.getAll("images") as File[];
 
-  if (!title || !shortDescription || !longDescription) {
-    return new NextResponse('Missing required text fields', { status: 400 });
+    console.log("=== POST Activity Debug ===");
+    console.log("Title:", title);
+    console.log("Number of images:", imageFiles.length);
+
+    if (!title || !shortDescription || !longDescription) {
+      return new NextResponse("Missing required text fields", { status: 400 });
+    }
+
+    let imageUrls: string[] = [];
+    let primaryImageUrl = "/placeholder.svg";
+
+    // Upload images (works both locally and on Vercel)
+    if (imageFiles && imageFiles.length > 0) {
+      const validFiles = imageFiles.filter(file => file && file.size > 0);
+      if (validFiles.length > 0) {
+        imageUrls = await uploadMultipleImagesToBlob(validFiles);
+        primaryImageUrl = imageUrls[0];
+        console.log(`✅ Uploaded ${imageUrls.length} images`);
+      }
+    } else {
+      console.log("⚠️ No images provided, using placeholder");
+    }
+
+    const slug = title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
+
+    // Create activity with multiple images
+    const newActivity = await prisma.activity.create({
+      data: {
+        slug,
+        title,
+        shortDescription,
+        longDescription,
+        imageUrl: primaryImageUrl,
+        images: {
+          create: imageUrls.map((url, index) => ({
+            url,
+            order: index,
+          })),
+        },
+      },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
+
+    console.log(`✅ Activity created with ${imageUrls.length} images`);
+    return NextResponse.json(newActivity, { status: 201 });
+  } catch (error) {
+    console.error("Error creating activity:", error);
+    return NextResponse.json(
+      { error: "Failed to create activity" },
+      { status: 500 }
+    );
   }
-
-  let imageUrl = '/placeholder.svg';
-  if (imageFile) {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    const fileExtension = path.extname(imageFile.name);
-    const filename = `${uniqueSuffix}${fileExtension}`;
-    const imagePath = path.join(uploadsDir, filename);
-    
-    // Convert ArrayBuffer to Buffer and write file
-    const buffer = Buffer.from(await imageFile.arrayBuffer());
-    await fs.writeFile(imagePath, buffer);
-    
-    imageUrl = `/uploads/${filename}`;
-  }
-
-  const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-
-  const newActivity = {
-    id: Date.now().toString(),
-    slug,
-    title,
-    shortDescription,
-    longDescription,
-    imageUrl,
-  };
-
-  activities.push(newActivity);
-  await writeActivities(activities);
-
-  return NextResponse.json(newActivity, { status: 201 });
 }
-

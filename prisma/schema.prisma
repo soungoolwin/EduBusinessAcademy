@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Activity {
+  id               String          @id @default(uuid())
+  slug             String          @unique
+  title            String
+  shortDescription String
+  longDescription  String
+  imageUrl         String          // Keep for backward compatibility (primary image)
+  images           ActivityImage[] // Multiple images
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model ActivityImage {
+  id         String   @id @default(uuid())
+  url        String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+}

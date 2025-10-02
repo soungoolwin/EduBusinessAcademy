@@ -1,106 +1,162 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { NextResponse } from 'next/server';
-import { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { uploadMultipleImagesToBlob } from "@/lib/upload-helper";
 
-const dataFilePath = path.join(process.cwd(), 'data/activities.json');
-const uploadsDir = path.join(process.cwd(), 'public/uploads');
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const activity = await prisma.activity.findUnique({
+      where: { id: params.id },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
 
-// This API route is designed for a local development environment.
-
-async function readActivities() {
-  const data = await fs.readFile(dataFilePath, 'utf-8');
-  return JSON.parse(data);
-}
-
-async function writeActivities(data: any) {
-  await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const activities = await readActivities();
-  const activity = activities.find((a: any) => a.id === params.id);
-  if (activity) {
-    return NextResponse.json(activity);
+    if (activity) {
+      return NextResponse.json(activity);
+    }
+    return new NextResponse("Activity not found", { status: 404 });
+  } catch (error) {
+    console.error("Error fetching activity:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch activity" },
+      { status: 500 }
+    );
   }
-  return new NextResponse('Activity not found', { status: 404 });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  let activities = await readActivities();
-  const index = activities.findIndex((a: any) => a.id === params.id);
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const existingActivity = await prisma.activity.findUnique({
+      where: { id: params.id },
+      include: {
+        images: true,
+      },
+    });
 
-  if (index === -1) {
-    return new NextResponse('Activity not found', { status: 404 });
-  }
+    if (!existingActivity) {
+      return new NextResponse("Activity not found", { status: 404 });
+    }
 
-  const formData = await request.formData();
-  const title = formData.get('title') as string;
-  const shortDescription = formData.get('shortDescription') as string;
-  const longDescription = formData.get('longDescription') as string;
-  const imageFile = formData.get('image') as File | null;
+    const formData = await request.formData();
+    const title = formData.get("title") as string;
+    const shortDescription = formData.get("shortDescription") as string;
+    const longDescription = formData.get("longDescription") as string;
+    const imageFiles = formData.getAll("images") as File[];
+    const keepExisting = formData.get("keepExistingImages") === "true";
 
-  const existingActivity = activities[index];
-  let imageUrl = existingActivity.imageUrl;
+    console.log("=== PUT Activity Debug ===");
+    console.log("Number of new images:", imageFiles.length);
+    console.log("Keep existing images:", keepExisting);
 
-  if (imageFile) {
-    // Delete old image if it's not the placeholder
-    if (existingActivity.imageUrl && existingActivity.imageUrl !== '/placeholder.svg') {
-      const oldImagePath = path.join(process.cwd(), 'public', existingActivity.imageUrl);
-      try {
-        await fs.unlink(oldImagePath);
-      } catch (err) {
-        console.error(`Failed to delete old image: ${oldImagePath}`, err);
+    // Upload new images
+    let newImageUrls: string[] = [];
+    let primaryImageUrl = existingActivity.imageUrl;
+
+    if (imageFiles && imageFiles.length > 0) {
+      const validFiles = imageFiles.filter(file => file && file.size > 0);
+      if (validFiles.length > 0) {
+        newImageUrls = await uploadMultipleImagesToBlob(validFiles);
+        if (!keepExisting && newImageUrls.length > 0) {
+          primaryImageUrl = newImageUrls[0];
+        }
+        console.log(`✅ Uploaded ${newImageUrls.length} new images`);
       }
     }
-    
-    // Save new image
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    const fileExtension = path.extname(imageFile.name);
-    const filename = `${uniqueSuffix}${fileExtension}`;
-    const imagePath = path.join(uploadsDir, filename);
-    
-    const buffer = Buffer.from(await imageFile.arrayBuffer());
-    await fs.writeFile(imagePath, buffer);
-    
-    imageUrl = `/uploads/${filename}`;
+
+    // Note: Old images in Vercel Blob will remain but database references will be removed
+    // For local dev, old files in public/uploads will remain (this is acceptable)
+
+    const slug = title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
+
+    // Update activity
+    const updatedActivity = await prisma.activity.update({
+      where: { id: params.id },
+      data: {
+        title,
+        shortDescription,
+        longDescription,
+        slug,
+        imageUrl: primaryImageUrl,
+        ...(keepExisting 
+          ? {
+              images: {
+                create: newImageUrls.map((url, index) => ({
+                  url,
+                  order: existingActivity.images.length + index,
+                })),
+              },
+            }
+          : {
+              images: {
+                deleteMany: {},
+                create: newImageUrls.map((url, index) => ({
+                  url,
+                  order: index,
+                })),
+              },
+            }
+        ),
+      },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
+
+    console.log(`✅ Activity updated with ${updatedActivity.images.length} total images`);
+    return NextResponse.json(updatedActivity);
+  } catch (error) {
+    console.error("Error updating activity:", error);
+    return NextResponse.json(
+      { error: "Failed to update activity" },
+      { status: 500 }
+    );
   }
-
-  const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-
-  activities[index] = {
-    ...existingActivity,
-    title,
-    shortDescription,
-    longDescription,
-    slug,
-    imageUrl,
-  };
-
-  await writeActivities(activities);
-  return NextResponse.json(activities[index]);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  let activities = await readActivities();
-  const activityToDelete = activities.find((a: any) => a.id === params.id);
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const activityToDelete = await prisma.activity.findUnique({
+      where: { id: params.id },
+    });
 
-  if (!activityToDelete) {
-    return new NextResponse('Activity not found', { status: 404 });
-  }
-
-  // Delete image file if it exists and is not the placeholder
-  if (activityToDelete.imageUrl && activityToDelete.imageUrl !== '/placeholder.svg') {
-    const imagePath = path.join(process.cwd(), 'public', activityToDelete.imageUrl);
-    try {
-      await fs.unlink(imagePath);
-    } catch (err) {
-      console.error(`Failed to delete image: ${imagePath}`, err);
+    if (!activityToDelete) {
+      return new NextResponse("Activity not found", { status: 404 });
     }
+
+    // Note: Images in Vercel Blob or local uploads folder will remain
+    // Database references will be removed automatically via onDelete: Cascade
+
+    await prisma.activity.delete({
+      where: { id: params.id },
+    });
+
+    return new NextResponse(null, { status: 204 }); // No Content
+  } catch (error) {
+    console.error("Error deleting activity:", error);
+    return NextResponse.json(
+      { error: "Failed to delete activity" },
+      { status: 500 }
+    );
   }
-
-  const filteredActivities = activities.filter((a: any) => a.id !== params.id);
-  await writeActivities(filteredActivities);
-
-  return new NextResponse(null, { status: 204 }); // No Content
 }

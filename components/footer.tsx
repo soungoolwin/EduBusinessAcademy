@@ -7,53 +7,103 @@ import {
   Facebook,
   Twitter,
   Linkedin,
+  ArrowRight,
 } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid md:grid-cols-4 gap-12">
           {/* Company Info */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                <GraduationCap className="h-6 w-6 text-white" />
               </div>
-              <span className="font-bold text-xl">EduBusiness Academy</span>
+              <span className="font-bold text-2xl">EduBusiness Academy</span>
             </div>
-            <p className="text-gray-300 mb-4 max-w-md">
+            <p className="text-gray-300 mb-6 max-w-md leading-relaxed text-sm">
               Empowering MSMEs, Start-ups, and Young Entrepreneurs in Myanmar
               through comprehensive business support services and vocational
               development programs.
             </p>
+            
+            {/* Social Media */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-400 font-medium">Follow us:</span>
+              <div className="flex gap-2">
+                <a
+                  href="#"
+                  className="w-9 h-9 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="h-4 w-4" />
+                </a>
+                <a
+                  href="#"
+                  className="w-9 h-9 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="h-4 w-4" />
+                </a>
+                <a
+                  href="#"
+                  className="w-9 h-9 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+            <h3 className="font-bold text-lg mb-6 text-emerald-400">Quick Links</h3>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/"
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
+                >
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                  Home
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/about"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors"
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
                 >
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                   About Us
                 </Link>
               </li>
               <li>
                 <Link
                   href="/services"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors"
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
                 >
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                   Our Services
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/contact"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors"
+                  href="/activities"
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
                 >
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                  Activities
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
+                >
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                   Contact Us
                 </Link>
               </li>
@@ -62,32 +112,49 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Contact Info</h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <Mail className="h-4 w-4 text-emerald-400 mt-1" />
-                <div className="text-gray-300 text-sm">
-                  <p>info@edubusiness.academy </p>
+            <h3 className="font-bold text-lg mb-6 text-emerald-400">Get In Touch</h3>
+            <div className="space-y-4">
+              <a
+                href="mailto:info@edubusiness.academy"
+                className="flex items-start gap-3 group hover:bg-gray-800 p-2 -ml-2 rounded-lg transition-colors"
+              >
+                <div className="w-8 h-8 bg-emerald-600/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-600/30 transition-colors">
+                  <Mail className="h-4 w-4 text-emerald-400" />
                 </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <Phone className="h-4 w-4 text-emerald-400 mt-1" />
                 <div className="text-gray-300 text-sm">
-                  <p>+95 9 785 341 840</p>
+                  <p className="text-gray-400 text-xs mb-0.5">Email</p>
+                  <p className="group-hover:text-emerald-400 transition-colors">
+                    info@edubusiness.academy
+                  </p>
                 </div>
-              </div>
+              </a>
+              <a
+                href="tel:+959785341840"
+                className="flex items-start gap-3 group hover:bg-gray-800 p-2 -ml-2 rounded-lg transition-colors"
+              >
+                <div className="w-8 h-8 bg-emerald-600/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-600/30 transition-colors">
+                  <Phone className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div className="text-gray-300 text-sm">
+                  <p className="text-gray-400 text-xs mb-0.5">Phone</p>
+                  <p className="group-hover:text-emerald-400 transition-colors">
+                    +95 9 785 341 840
+                  </p>
+                </div>
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 text-sm">
-            © 2024 EduBusiness Academy. All rights reserved. |
-            <span className="text-emerald-400">
-              {" "}
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-400 text-sm text-center md:text-left">
+              © 2024 EduBusiness Academy. All rights reserved.
+            </p>
+            <p className="text-emerald-400 text-sm font-medium">
               Empowering Myanmar's Entrepreneurs
-            </span>
-          </p>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
