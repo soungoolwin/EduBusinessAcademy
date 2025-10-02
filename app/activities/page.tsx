@@ -144,3 +144,5 @@ export default async function ActivitiesPage() {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic';
