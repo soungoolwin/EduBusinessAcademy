@@ -12,6 +12,7 @@ export async function uploadImageToBlob(file: File): Promise<string> {
       const blob = await put(file.name, file, {
         access: "public",
         token: process.env.BLOB_READ_WRITE_TOKEN,
+        addRandomSuffix: true, // Prevent duplicate filename errors
       });
       console.log(`✅ Uploaded to Blob: ${blob.url}`);
       return blob.url;
