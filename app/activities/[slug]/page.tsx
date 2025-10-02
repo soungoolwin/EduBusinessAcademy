@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { ImageGallery } from "@/components/image-gallery";
+import { prisma } from "@/lib/prisma";
 
 interface ActivityImage {
   id: string;
@@ -26,20 +27,26 @@ interface Activity {
 
 async function getActivity(slug: string): Promise<Activity | null> {
   try {
-    // Use VERCEL_URL for production or localhost for development
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL ||
-        `http://localhost:${process.env.PORT || 3000}`;
+    // Fetch directly from database
+    const activity = await prisma.activity.findUnique({
+      where: { slug },
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
 
-    const url = `${baseUrl}/api/activities`;
+    if (!activity) return null;
 
-    const res = await fetch(url, { cache: "no-store" });
-
-    if (!res.ok) return null;
-
-    const activities: Activity[] = await res.json();
-    return activities.find((a) => a.slug === slug) || null;
+    // Convert to plain object with string dates
+    return {
+      ...activity,
+      createdAt: activity.createdAt.toISOString(),
+      updatedAt: activity.updatedAt.toISOString(),
+    };
   } catch (error) {
     console.error("Error fetching activity:", error);
     return null;

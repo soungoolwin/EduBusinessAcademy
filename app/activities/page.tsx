@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowRight } from "lucide-react";
 import { ImageCarousel } from "@/components/image-carousel";
+import { prisma } from "@/lib/prisma";
 
 interface ActivityImage {
   id: string;
@@ -25,28 +26,26 @@ interface Activity {
 
 async function getActivities(): Promise<Activity[]> {
   try {
-    // Use VERCEL_URL for production or localhost for development
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL ||
-        `http://localhost:${process.env.PORT || 3000}`;
-
-    const url = `${baseUrl}/api/activities`;
-
-    console.log("Fetching activities from:", url);
-
-    const res = await fetch(url, {
-      cache: "no-store",
+    // Fetch directly from database instead of API route
+    const activities = await prisma.activity.findMany({
+      include: {
+        images: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
-    if (!res.ok) {
-      console.error("Failed to fetch activities, status:", res.status);
-      return [];
-    }
-
-    const data = await res.json();
-    console.log("Fetched activities:", data.length);
-    return data;
+    // Convert to plain objects with string dates
+    return activities.map(activity => ({
+      ...activity,
+      createdAt: activity.createdAt.toISOString(),
+      updatedAt: activity.updatedAt.toISOString(),
+    }));
   } catch (error) {
     console.error("Error fetching activities:", error);
     return [];
