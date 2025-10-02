@@ -26,11 +26,11 @@ interface Activity {
 
 async function getActivity(slug: string): Promise<Activity | null> {
   try {
-    // Use absolute URL for server-side rendering with dynamic port detection
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-      (typeof window === 'undefined' 
-        ? `http://localhost:${process.env.PORT || 3000}` 
-        : '');
+    // Use VERCEL_URL for production or localhost for development
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    
     const url = `${baseUrl}/api/activities`;
     
     const res = await fetch(url, { cache: 'no-store' });
