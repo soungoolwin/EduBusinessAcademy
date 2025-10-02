@@ -33,7 +33,7 @@ async function getActivity(slug: string): Promise<Activity | null> {
       include: {
         images: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },

@@ -31,17 +31,17 @@ async function getActivities(): Promise<Activity[]> {
       include: {
         images: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     // Convert to plain objects with string dates
-    return activities.map(activity => ({
+    return activities.map((activity) => ({
       ...activity,
       createdAt: activity.createdAt.toISOString(),
       updatedAt: activity.updatedAt.toISOString(),
