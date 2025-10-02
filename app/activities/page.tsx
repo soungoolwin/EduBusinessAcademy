@@ -26,10 +26,11 @@ interface Activity {
 async function getActivities(): Promise<Activity[]> {
   try {
     // Use VERCEL_URL for production or localhost for development
-    const baseUrl = process.env.VERCEL_URL 
+    const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    
+      : process.env.NEXT_PUBLIC_BASE_URL ||
+        `http://localhost:${process.env.PORT || 3000}`;
+
     const url = `${baseUrl}/api/activities`;
 
     console.log("Fetching activities from:", url);
@@ -145,4 +146,4 @@ export default async function ActivitiesPage() {
   );
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

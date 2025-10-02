@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, ArrowLeft } from 'lucide-react';
-import { ImageGallery } from '@/components/image-gallery';
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, ArrowLeft } from "lucide-react";
+import { ImageGallery } from "@/components/image-gallery";
 
 interface ActivityImage {
   id: string;
@@ -27,25 +27,30 @@ interface Activity {
 async function getActivity(slug: string): Promise<Activity | null> {
   try {
     // Use VERCEL_URL for production or localhost for development
-    const baseUrl = process.env.VERCEL_URL 
+    const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    
+      : process.env.NEXT_PUBLIC_BASE_URL ||
+        `http://localhost:${process.env.PORT || 3000}`;
+
     const url = `${baseUrl}/api/activities`;
-    
-    const res = await fetch(url, { cache: 'no-store' });
-    
+
+    const res = await fetch(url, { cache: "no-store" });
+
     if (!res.ok) return null;
-    
+
     const activities: Activity[] = await res.json();
     return activities.find((a) => a.slug === slug) || null;
   } catch (error) {
-    console.error('Error fetching activity:', error);
+    console.error("Error fetching activity:", error);
     return null;
   }
 }
 
-export default async function ActivityDetailPage({ params }: { params: { slug: string } }) {
+export default async function ActivityDetailPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const activity = await getActivity(params.slug);
 
   if (!activity) {
@@ -58,7 +63,10 @@ export default async function ActivityDetailPage({ params }: { params: { slug: s
       <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-12">
         <div className="container mx-auto px-4 md:px-6 max-w-5xl">
           <Link href="/activities">
-            <Button variant="ghost" className="mb-6 -ml-4 text-white hover:text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              className="mb-6 -ml-4 text-white hover:text-white hover:bg-white/10"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Activities
             </Button>
@@ -72,10 +80,10 @@ export default async function ActivityDetailPage({ params }: { params: { slug: s
           <div className="flex items-center gap-2 text-white/90">
             <Calendar className="h-4 w-4" />
             <time dateTime={activity.createdAt}>
-              {new Date(activity.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+              {new Date(activity.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </time>
           </div>
@@ -90,9 +98,11 @@ export default async function ActivityDetailPage({ params }: { params: { slug: s
             {/* Image Gallery */}
             <Card className="border-0 shadow-lg overflow-hidden">
               <ImageGallery
-                images={activity.images && activity.images.length > 0 
-                  ? activity.images 
-                  : [{ id: 'primary', url: activity.imageUrl, order: 0 }]}
+                images={
+                  activity.images && activity.images.length > 0
+                    ? activity.images
+                    : [{ id: "primary", url: activity.imageUrl, order: 0 }]
+                }
                 alt={activity.title}
               />
             </Card>
@@ -100,12 +110,16 @@ export default async function ActivityDetailPage({ params }: { params: { slug: s
             {/* Description */}
             <Card className="border-0 shadow-lg">
               <div className="p-6">
-                <h2 className="text-xl font-semibold mb-3 text-emerald-700">Overview</h2>
+                <h2 className="text-xl font-semibold mb-3 text-emerald-700">
+                  Overview
+                </h2>
                 <p className="text-gray-700 leading-relaxed mb-6">
                   {activity.shortDescription}
                 </p>
-                
-                <h2 className="text-xl font-semibold mb-3 text-emerald-700">Details</h2>
+
+                <h2 className="text-xl font-semibold mb-3 text-emerald-700">
+                  Details
+                </h2>
                 <div className="prose max-w-none">
                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {activity.longDescription}
@@ -119,35 +133,45 @@ export default async function ActivityDetailPage({ params }: { params: { slug: s
           <div className="lg:col-span-1">
             <Card className="border-0 shadow-lg sticky top-4">
               <div className="p-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-900">Activity Info</h3>
-                
+                <h3 className="text-lg font-semibold mb-4 text-gray-900">
+                  Activity Info
+                </h3>
+
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Published</p>
                     <p className="font-medium text-gray-900">
-                      {new Date(activity.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                      {new Date(activity.createdAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </p>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Last Updated</p>
                     <p className="font-medium text-gray-900">
-                      {new Date(activity.updatedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                      {new Date(activity.updatedAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </p>
                   </div>
 
                   {activity.images && activity.images.length > 0 && (
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Images</p>
-                      <p className="font-medium text-gray-900">{activity.images.length} photos</p>
+                      <p className="font-medium text-gray-900">
+                        {activity.images.length} photos
+                      </p>
                     </div>
                   )}
                 </div>
@@ -168,4 +192,4 @@ export default async function ActivityDetailPage({ params }: { params: { slug: s
   );
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
