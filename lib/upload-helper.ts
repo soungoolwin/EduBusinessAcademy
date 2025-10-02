@@ -41,10 +41,16 @@ export async function uploadMultipleImagesToBlob(
   const uploadedUrls: string[] = [];
 
   // Upload sequentially to avoid Vercel rate limits and timeouts
-  for (const file of files) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     try {
       const url = await uploadImageToBlob(file);
       uploadedUrls.push(url);
+
+      // Add small delay between uploads to avoid rate limiting (except for last file)
+      if (i < files.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
     } catch (error) {
       console.error(`Failed to upload ${file.name}:`, error);
       throw error; // Re-throw to stop the process

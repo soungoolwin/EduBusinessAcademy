@@ -3,6 +3,10 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { uploadMultipleImagesToBlob } from "@/lib/upload-helper";
 
+// Configure for larger body size and longer timeout
+export const runtime = "nodejs";
+export const maxDuration = 60; // 60 seconds for image uploads
+
 export async function GET() {
   try {
     const activities = await prisma.activity.findMany({
@@ -12,7 +16,7 @@ export async function GET() {
       include: {
         images: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Upload images (works both locally and on Vercel)
     if (imageFiles && imageFiles.length > 0) {
-      const validFiles = imageFiles.filter(file => file && file.size > 0);
+      const validFiles = imageFiles.filter((file) => file && file.size > 0);
       if (validFiles.length > 0) {
         imageUrls = await uploadMultipleImagesToBlob(validFiles);
         primaryImageUrl = imageUrls[0];
@@ -82,7 +86,7 @@ export async function POST(request: NextRequest) {
       include: {
         images: {
           orderBy: {
-            order: 'asc',
+            order: "asc",
           },
         },
       },
@@ -92,8 +96,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newActivity, { status: 201 });
   } catch (error) {
     console.error("Error creating activity:", error);
+
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+
     return NextResponse.json(
-      { error: "Failed to create activity" },
+      {
+        error: "Failed to create activity",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
