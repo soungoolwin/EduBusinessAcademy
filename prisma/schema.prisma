@@ -33,3 +33,58 @@ model ActivityImage {
 
   @@index([activityId])
 }
+
+model InvestorApplication {
+  id                  String   @id @default(uuid())
+  // Personal Information
+  fullName            String
+  email               String
+  phoneNumber         String
+  organization        String?
+  address             String
+  socialWebsite       String?
+  // Investment Information
+  financialInvestor   Boolean  @default(false)
+  advisorMentor       Boolean  @default(false)
+  businessPartner     Boolean  @default(false)
+  otherType           String?
+  sector              String
+  experienceSkills    String
+  investmentModel     String
+  // Metadata
+  status              String   @default("pending") // pending, reviewed, approved, rejected
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model EntrepreneurApplication {
+  id                  String   @id @default(uuid())
+  // Personal Information
+  fullName            String
+  email               String
+  phoneNumber         String
+  currentOccupation   String
+  address             String
+  socialLinks         String?
+  // Idea and Business Details
+  businessName        String?
+  ideaSummary         String
+  problemSolved       String
+  targetCustomer      String?
+  businessStage       String   // idea, research, testing, operating
+  physicalAssets      String
+  mentalAssets        String
+  // Requirements
+  assistanceNeeded    String
+  expectations        String
+  // Metadata
+  status              String   @default("pending") // pending, reviewed, approved, rejected
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([email])
+  @@index([createdAt])
+}
