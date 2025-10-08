@@ -28,31 +28,19 @@ export default function Footer() {
               through comprehensive business support services and vocational
               development programs.
             </p>
-            
+
             {/* Social Media */}
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400 font-medium">Follow us:</span>
+              <span className="text-sm text-gray-400 font-medium">
+                Follow us:
+              </span>
               <div className="flex gap-2">
                 <a
-                  href="#"
+                  href="https://www.facebook.com/people/EduBusiness-Academy/61563441478165/"
                   className="w-9 h-9 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
                   aria-label="Facebook"
                 >
                   <Facebook className="h-4 w-4" />
-                </a>
-                <a
-                  href="#"
-                  className="w-9 h-9 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                  aria-label="Twitter"
-                >
-                  <Twitter className="h-4 w-4" />
-                </a>
-                <a
-                  href="#"
-                  className="w-9 h-9 bg-gray-800 hover:bg-emerald-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -60,7 +48,9 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-bold text-lg mb-6 text-emerald-400">Quick Links</h3>
+            <h3 className="font-bold text-lg mb-6 text-emerald-400">
+              Quick Links
+            </h3>
             <ul className="space-y-3">
               <li>
                 <Link
@@ -112,7 +102,9 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-bold text-lg mb-6 text-emerald-400">Get In Touch</h3>
+            <h3 className="font-bold text-lg mb-6 text-emerald-400">
+              Get In Touch
+            </h3>
             <div className="space-y-4">
               <a
                 href="mailto:info@edubusiness.academy"

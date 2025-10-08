@@ -42,7 +42,7 @@ export default function Navigation() {
                 EduBusiness Academy
               </span>
               <span className="text-xs text-emerald-600 font-medium">
-                Empowering Entrepreneurs
+                Empower the Future
               </span>
             </div>
           </Link>

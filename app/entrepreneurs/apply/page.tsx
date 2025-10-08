@@ -185,7 +185,7 @@ export default function EntrepreneurApplicationPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Aspiring Entrepreneur Application
+            Aspiring Entrepreneur Application Portal
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Join our Mini Incubation Center to turn your business idea into
@@ -319,9 +319,7 @@ export default function EntrepreneurApplicationPage() {
                     placeholder="Student, Software Engineer, Teacher, etc."
                     value={formData.currentOccupation}
                     onChange={handleInputChange}
-                    className={
-                      errors.currentOccupation ? "border-red-500" : ""
-                    }
+                    className={errors.currentOccupation ? "border-red-500" : ""}
                   />
                   {errors.currentOccupation && (
                     <p className="text-sm text-red-500">
@@ -400,7 +398,8 @@ export default function EntrepreneurApplicationPage() {
                     className={errors.ideaSummary ? "border-red-500" : ""}
                   />
                   <p className="text-xs text-gray-500">
-                    Word count: {formData.ideaSummary.split(/\s+/).filter((w) => w).length}{" "}
+                    Word count:{" "}
+                    {formData.ideaSummary.split(/\s+/).filter((w) => w).length}{" "}
                     / ~150 words
                   </p>
                   {errors.ideaSummary && (
@@ -677,4 +676,3 @@ export default function EntrepreneurApplicationPage() {
     </div>
   );
 }
-
