@@ -9,6 +9,7 @@ import {
   Network,
   Globe,
   CheckCircle,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -293,6 +294,42 @@ export default function ServicesPage() {
                   </ul>
                   <Button asChild className="bg-cyan-600 hover:bg-cyan-700">
                     <Link href="/contact">Enhance Your Products</Link>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Business Systemization Course */}
+            <Card className="overflow-hidden">
+              <div className="md:flex">
+                <div className="md:w-1/3 bg-indigo-100 p-8 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Settings className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-indigo-800">
+                      Business Systemization Course
+                    </h3>
+                  </div>
+                </div>
+                <div className="md:w-2/3 p-8">
+                  <CardDescription className="text-base text-gray-700 mb-4">
+                    Transform your business operations with our comprehensive
+                    systemization course. Learn to create efficient processes,
+                    standard operating procedures, and scalable systems that
+                    enable sustainable growth and reduce dependency on key
+                    individuals.
+                  </CardDescription>
+                  <ul className="space-y-2 text-gray-600 mb-6">
+                    <li>• Process mapping and documentation</li>
+                    <li>• Standard Operating Procedures (SOPs) development</li>
+                    <li>• Workflow automation and optimization</li>
+                    <li>• Systems thinking and implementation</li>
+                    <li>• Performance metrics and KPI tracking</li>
+                    <li>• Scalability planning and execution</li>
+                  </ul>
+                  <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+                    <Link href="/contact">Enroll in Course</Link>
                   </Button>
                 </div>
               </div>

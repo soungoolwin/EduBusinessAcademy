@@ -16,6 +16,7 @@ export default function Navigation() {
     { href: "/about", label: "About Us" },
     { href: "/services", label: "Services" },
     { href: "/activities", label: "Activities" },
+    { href: "/videos", label: "Videos" },
     { href: "/entrepreneurs/apply", label: "Join Incubator" },
     { href: "/investors/apply", label: "Become Partner" },
     { href: "/contact", label: "Contact" },

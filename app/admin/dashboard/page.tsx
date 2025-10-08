@@ -74,23 +74,58 @@ interface EntrepreneurApplication {
   updatedAt: string;
 }
 
+interface Video {
+  id: string;
+  title: string;
+  description: string | null;
+  youtubeUrl: string;
+  thumbnail: string | null;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"activities" | "investors" | "entrepreneurs">("activities");
+  const [activeTab, setActiveTab] = useState<
+    "activities" | "investors" | "entrepreneurs" | "videos"
+  >("activities");
   const [activities, setActivities] = useState<Activity[]>([]);
   const [investors, setInvestors] = useState<InvestorApplication[]>([]);
-  const [entrepreneurs, setEntrepreneurs] = useState<EntrepreneurApplication[]>([]);
+  const [entrepreneurs, setEntrepreneurs] = useState<EntrepreneurApplication[]>(
+    []
+  );
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isVideoSheetOpen, setIsVideoSheetOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState<Partial<Activity>>({});
+  const [currentVideo, setCurrentVideo] = useState<Partial<Video>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [selectedInvestor, setSelectedInvestor] = useState<InvestorApplication | null>(null);
-  const [selectedEntrepreneur, setSelectedEntrepreneur] = useState<EntrepreneurApplication | null>(null);
+  const [selectedInvestor, setSelectedInvestor] =
+    useState<InvestorApplication | null>(null);
+  const [selectedEntrepreneur, setSelectedEntrepreneur] =
+    useState<EntrepreneurApplication | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchActivities();
-    fetchInvestors();
-    fetchEntrepreneurs();
+    loadAllData();
   }, []);
+
+  const loadAllData = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([
+        fetchActivities(),
+        fetchInvestors(),
+        fetchEntrepreneurs(),
+        fetchVideos(),
+      ]);
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchInvestors = async () => {
     try {
@@ -131,6 +166,27 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error fetching entrepreneur applications:", error);
       setEntrepreneurs([]);
+    }
+  };
+
+  const fetchVideos = async () => {
+    try {
+      const res = await fetch("/api/videos");
+      if (!res.ok) {
+        console.error("Failed to fetch videos:", res.status);
+        setVideos([]);
+        return;
+      }
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setVideos(data);
+      } else {
+        console.error("Videos data is not an array:", data);
+        setVideos([]);
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      setVideos([]);
     }
   };
 
@@ -227,12 +283,101 @@ export default function AdminDashboard() {
     }
   };
 
+  // Video Management Functions
+  const handleVideoSave = async () => {
+    try {
+      const response = await fetch("/api/videos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(currentVideo),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || "Failed to save video");
+        return;
+      }
+
+      fetchVideos();
+      setIsVideoSheetOpen(false);
+      setCurrentVideo({});
+    } catch (error) {
+      console.error("Error saving video:", error);
+      alert("Failed to save video");
+    }
+  };
+
+  const handleVideoDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this video?")) {
+      try {
+        await fetch(`/api/videos/${id}`, { method: "DELETE" });
+        fetchVideos();
+      } catch (error) {
+        console.error("Error deleting video:", error);
+        alert("Failed to delete video");
+      }
+    }
+  };
+
+  const handleAddNewVideo = () => {
+    setCurrentVideo({});
+    setIsVideoSheetOpen(true);
+  };
+
+  // Loading State
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+        <div className="text-center">
+          {/* Animated Spinner */}
+          <div className="relative">
+            <div className="w-24 h-24 border-8 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full opacity-20 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Loading Text */}
+          <div className="mt-8 space-y-3">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Loading Dashboard
+            </h2>
+            <p className="text-gray-600 animate-pulse">
+              Please wait while we fetch your data...
+            </p>
+
+            {/* Progress Dots */}
+            <div className="flex justify-center gap-2 mt-4">
+              <div
+                className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0ms" }}
+              ></div>
+              <div
+                className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"
+                style={{ animationDelay: "150ms" }}
+              ></div>
+              <div
+                className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"
+                style={{ animationDelay: "300ms" }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-12 px-4 md:px-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         {activeTab === "activities" && (
           <Button onClick={handleAddNew}>Add New Activity</Button>
+        )}
+        {activeTab === "videos" && (
+          <Button onClick={handleAddNewVideo}>Add New Video</Button>
         )}
       </div>
 
@@ -276,6 +421,19 @@ export default function AdminDashboard() {
             Entrepreneur Applications
             <Badge className="ml-2 bg-blue-100 text-blue-800">
               {entrepreneurs.length}
+            </Badge>
+          </button>
+          <button
+            onClick={() => setActiveTab("videos")}
+            className={`${
+              activeTab === "videos"
+                ? "border-red-500 text-red-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+          >
+            Videos
+            <Badge className="ml-2 bg-red-100 text-red-800">
+              {videos.length}
             </Badge>
           </button>
         </nav>
@@ -465,7 +623,7 @@ export default function AdminDashboard() {
                         {entrepreneur.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <Badge 
+                        <Badge
                           className={
                             entrepreneur.businessStage === "idea"
                               ? "bg-yellow-100 text-yellow-800"
@@ -477,9 +635,12 @@ export default function AdminDashboard() {
                           }
                         >
                           {entrepreneur.businessStage === "idea" && "💡 Idea"}
-                          {entrepreneur.businessStage === "research" && "🔍 Research"}
-                          {entrepreneur.businessStage === "testing" && "🧪 Testing"}
-                          {entrepreneur.businessStage === "operating" && "🚀 Operating"}
+                          {entrepreneur.businessStage === "research" &&
+                            "🔍 Research"}
+                          {entrepreneur.businessStage === "testing" &&
+                            "🧪 Testing"}
+                          {entrepreneur.businessStage === "operating" &&
+                            "🚀 Operating"}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
@@ -499,6 +660,116 @@ export default function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Videos Tab */}
+      {activeTab === "videos" && (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Thumbnail
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      YouTube URL
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {videos.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-6 py-8 text-center text-gray-500"
+                      >
+                        No videos yet. Add your first video!
+                      </td>
+                    </tr>
+                  ) : (
+                    videos.map((video) => (
+                      <tr key={video.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          {video.thumbnail ? (
+                            <Image
+                              src={video.thumbnail}
+                              alt={video.title}
+                              width={120}
+                              height={68}
+                              className="rounded object-cover"
+                            />
+                          ) : (
+                            <div className="w-[120px] h-[68px] bg-gray-200 rounded flex items-center justify-center">
+                              <svg
+                                className="w-8 h-8 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {video.title}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-500 max-w-xs truncate">
+                            {video.description || "No description"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <a
+                            href={video.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-red-600 hover:text-red-800 hover:underline"
+                          >
+                            Watch on YouTube →
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {new Date(video.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleVideoDelete(video.id)}
+                          >
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -719,6 +990,125 @@ export default function AdminDashboard() {
                 {currentActivity.id
                   ? "💾 Update Activity"
                   : "✨ Create Activity"}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Video Add/Edit Sheet */}
+      <Sheet open={isVideoSheetOpen} onOpenChange={setIsVideoSheetOpen}>
+        <SheetContent className="w-full max-w-2xl overflow-y-auto p-8">
+          <SheetHeader className="pb-6 border-b mb-8">
+            <SheetTitle className="text-3xl font-bold">
+              Add New Video
+            </SheetTitle>
+            <p className="text-gray-600 text-base">
+              Add a YouTube video to your gallery
+            </p>
+          </SheetHeader>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label
+                htmlFor="videoTitle"
+                className="text-lg font-semibold text-gray-800"
+              >
+                Video Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="videoTitle"
+                placeholder="Enter video title"
+                value={currentVideo.title || ""}
+                onChange={(e) =>
+                  setCurrentVideo({
+                    ...currentVideo,
+                    title: e.target.value,
+                  })
+                }
+                className="text-base h-12 px-4"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label
+                htmlFor="videoDescription"
+                className="text-lg font-semibold text-gray-800"
+              >
+                Description (Optional)
+              </Label>
+              <Textarea
+                id="videoDescription"
+                placeholder="Brief description of the video content"
+                value={currentVideo.description || ""}
+                onChange={(e) =>
+                  setCurrentVideo({
+                    ...currentVideo,
+                    description: e.target.value,
+                  })
+                }
+                rows={3}
+                className="text-base px-4 py-3"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label
+                htmlFor="youtubeUrl"
+                className="text-lg font-semibold text-gray-800"
+              >
+                YouTube URL <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="youtubeUrl"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={currentVideo.youtubeUrl || ""}
+                onChange={(e) =>
+                  setCurrentVideo({
+                    ...currentVideo,
+                    youtubeUrl: e.target.value,
+                  })
+                }
+                className="text-base h-12 px-4"
+              />
+              <p className="text-sm text-gray-500">
+                Paste the full YouTube URL (e.g.,
+                https://www.youtube.com/watch?v=dQw4w9WgXcQ or
+                https://youtu.be/dQw4w9WgXcQ)
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label
+                htmlFor="videoOrder"
+                className="text-lg font-semibold text-gray-800"
+              >
+                Display Order (Optional)
+              </Label>
+              <Input
+                id="videoOrder"
+                type="number"
+                placeholder="0"
+                value={currentVideo.order || 0}
+                onChange={(e) =>
+                  setCurrentVideo({
+                    ...currentVideo,
+                    order: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="text-base h-12 px-4"
+              />
+              <p className="text-sm text-gray-500">
+                Lower numbers appear first (default: 0)
+              </p>
+            </div>
+
+            <div className="pt-6 border-t">
+              <Button
+                onClick={handleVideoSave}
+                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                disabled={!currentVideo.title || !currentVideo.youtubeUrl}
+              >
+                🎥 Add Video
               </Button>
             </div>
           </div>
@@ -974,16 +1364,15 @@ export default function AdminDashboard() {
                   </h2>
                   <p className="text-sm text-gray-500 mt-2">
                     Submitted on{" "}
-                    {new Date(selectedEntrepreneur.createdAt).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}
+                    {new Date(
+                      selectedEntrepreneur.createdAt
+                    ).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
                 <button
@@ -1104,7 +1493,7 @@ export default function AdminDashboard() {
                   <h3 className="text-2xl font-bold text-gray-900 border-b-2 border-blue-200 pb-3">
                     💡 Idea and Business Details
                   </h3>
-                  
+
                   {selectedEntrepreneur.businessName && (
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-lg border border-blue-200">
                       <Label className="text-sm font-medium text-gray-700">
@@ -1121,7 +1510,7 @@ export default function AdminDashboard() {
                       <Label className="text-sm font-medium text-gray-500">
                         Business Stage
                       </Label>
-                      <Badge 
+                      <Badge
                         className={
                           selectedEntrepreneur.businessStage === "idea"
                             ? "bg-yellow-100 text-yellow-800"
@@ -1132,10 +1521,14 @@ export default function AdminDashboard() {
                             : "bg-green-100 text-green-800"
                         }
                       >
-                        {selectedEntrepreneur.businessStage === "idea" && "💡 Idea Stage"}
-                        {selectedEntrepreneur.businessStage === "research" && "🔍 Research Stage"}
-                        {selectedEntrepreneur.businessStage === "testing" && "🧪 Testing Stage"}
-                        {selectedEntrepreneur.businessStage === "operating" && "🚀 Operating Stage"}
+                        {selectedEntrepreneur.businessStage === "idea" &&
+                          "💡 Idea Stage"}
+                        {selectedEntrepreneur.businessStage === "research" &&
+                          "🔍 Research Stage"}
+                        {selectedEntrepreneur.businessStage === "testing" &&
+                          "🧪 Testing Stage"}
+                        {selectedEntrepreneur.businessStage === "operating" &&
+                          "🚀 Operating Stage"}
                       </Badge>
                     </div>
                   </div>

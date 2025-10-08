@@ -90,6 +90,15 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/videos"
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
+                >
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                  Videos
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/contact"
                   className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center gap-2 group text-sm"
                 >
