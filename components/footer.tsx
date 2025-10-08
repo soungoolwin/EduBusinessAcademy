@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
-  GraduationCap,
   Mail,
   Phone,
   MapPin,
@@ -17,9 +17,15 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-12">
           {/* Company Info */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
-                <GraduationCap className="h-6 w-6 text-white" />
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-24 h-24 relative">
+                <Image
+                  src="/logo.png"
+                  alt="EduBusiness Academy Logo"
+                  width={96}
+                  height={96}
+                  className="object-contain"
+                />
               </div>
               <span className="font-bold text-2xl">EduBusiness Academy</span>
             </div>

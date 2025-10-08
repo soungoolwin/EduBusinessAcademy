@@ -2,23 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, GraduationCap, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import LogoModal from "./logo-modal";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [logoModalOpen, setLogoModalOpen] = useState(false);
   const pathname = usePathname();
 
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/about", label: "About Us" },
     { href: "/services", label: "Services" },
     { href: "/activities", label: "Activities" },
     { href: "/videos", label: "Videos" },
     { href: "/entrepreneurs/apply", label: "Join Incubator" },
     { href: "/investors/apply", label: "Become Partner" },
+    { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -32,21 +35,35 @@ export default function Navigation() {
   return (
     <nav className="shadow-md border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-28">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all group-hover:scale-105">
-              <GraduationCap className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-xl text-gray-900 leading-tight">
+          <div className="flex items-center gap-4">
+            {/* Logo Image - Opens Modal */}
+            <button
+              onClick={() => setLogoModalOpen(true)}
+              className="w-24 h-24 relative hover:scale-105 transition-transform cursor-pointer group"
+              aria-label="View logo story"
+            >
+              <Image
+                src="/logo.png"
+                alt="EduBusiness Academy Logo"
+                width={96}
+                height={96}
+                className="object-contain"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-2xl transition-colors" />
+            </button>
+
+            {/* Text - Links to Home */}
+            <Link href="/" className="flex flex-col group">
+              <span className="font-bold text-xl text-gray-900 leading-tight group-hover:text-emerald-600 transition-colors">
                 EduBusiness Academy
               </span>
               <span className="text-xs text-emerald-600 font-medium">
                 Empower the Future
               </span>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
@@ -81,10 +98,24 @@ export default function Navigation() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] px-6">
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg flex items-center justify-center">
-                    <GraduationCap className="h-5 w-5 text-white" />
-                  </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setLogoModalOpen(true);
+                    }}
+                    className="w-20 h-20 relative hover:scale-105 transition-transform group"
+                    aria-label="View logo story"
+                  >
+                    <Image
+                      src="/logo.png"
+                      alt="EduBusiness Academy Logo"
+                      width={80}
+                      height={80}
+                      className="object-contain"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
+                  </button>
                   <span className="font-bold text-lg text-gray-900">Menu</span>
                 </div>
               </div>
@@ -108,6 +139,12 @@ export default function Navigation() {
           </Sheet>
         </div>
       </div>
+
+      {/* Logo Story Modal */}
+      <LogoModal
+        isOpen={logoModalOpen}
+        onClose={() => setLogoModalOpen(false)}
+      />
     </nav>
   );
 }
