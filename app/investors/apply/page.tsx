@@ -587,10 +587,10 @@ export default function InvestorApplicationPage() {
           <p>
             Need help? Contact us at{" "}
             <a
-              href="mailto:info@edubusiness.com"
+              href="mailto:info@edubusiness.academy"
               className="text-emerald-600 hover:underline"
             >
-              info@edubusiness.com
+              info@edubusiness.academy
             </a>
           </p>
         </div>

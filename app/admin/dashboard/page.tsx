@@ -96,6 +96,7 @@ export default function AdminDashboard() {
   );
   const [videos, setVideos] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingActivity, setIsSavingActivity] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isVideoSheetOpen, setIsVideoSheetOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState<Partial<Activity>>({});
@@ -212,52 +213,63 @@ export default function AdminDashboard() {
   };
 
   const handleSave = async () => {
-    const formData = new FormData();
-    formData.append("title", currentActivity.title || "");
-    formData.append("shortDescription", currentActivity.shortDescription || "");
-    formData.append("longDescription", currentActivity.longDescription || "");
-    if (currentActivity.id) {
-      formData.append("id", currentActivity.id);
-    }
+    try {
+      setIsSavingActivity(true);
+      const formData = new FormData();
+      formData.append("title", currentActivity.title || "");
+      formData.append(
+        "shortDescription",
+        currentActivity.shortDescription || ""
+      );
+      formData.append("longDescription", currentActivity.longDescription || "");
+      if (currentActivity.id) {
+        formData.append("id", currentActivity.id);
+      }
 
-    // Debug file upload - use state instead of ref
-    console.log("=== Client Side Debug ===");
-    console.log("Number of files selected:", selectedFiles.length);
+      // Debug file upload - use state instead of ref
+      console.log("=== Client Side Debug ===");
+      console.log("Number of files selected:", selectedFiles.length);
 
-    // Append all selected files with the key "images"
-    selectedFiles.forEach((file, index) => {
-      formData.append("images", file);
-      console.log(`✅ File ${index + 1} appended:`, file.name);
-    });
+      // Append all selected files with the key "images"
+      selectedFiles.forEach((file, index) => {
+        formData.append("images", file);
+        console.log(`✅ File ${index + 1} appended:`, file.name);
+      });
 
-    if (selectedFiles.length === 0) {
-      console.log("⚠️ No files to upload");
-    }
+      if (selectedFiles.length === 0) {
+        console.log("⚠️ No files to upload");
+      }
 
-    const method = currentActivity.id ? "PUT" : "POST";
-    const url = currentActivity.id
-      ? `/api/activities/${currentActivity.id}`
-      : "/api/activities";
+      const method = currentActivity.id ? "PUT" : "POST";
+      const url = currentActivity.id
+        ? `/api/activities/${currentActivity.id}`
+        : "/api/activities";
 
-    console.log("Sending request to:", url);
+      console.log("Sending request to:", url);
 
-    const response = await fetch(url, {
-      method,
-      body: formData, // No 'Content-Type' header, browser sets it for FormData
-    });
+      const response = await fetch(url, {
+        method,
+        body: formData, // No 'Content-Type' header, browser sets it for FormData
+      });
 
-    console.log("Response status:", response.status);
-    const data = await response.json();
-    console.log("Response data:", data);
+      console.log("Response status:", response.status);
+      const data = await response.json();
+      console.log("Response data:", data);
 
-    fetchActivities();
-    setIsSheetOpen(false);
-    setCurrentActivity({});
-    setSelectedFiles([]);
+      fetchActivities();
+      setIsSheetOpen(false);
+      setCurrentActivity({});
+      setSelectedFiles([]);
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Error saving activity:", error);
+      alert("Failed to save activity. Please try again.");
+    } finally {
+      setIsSavingActivity(false);
     }
   };
 
@@ -985,11 +997,36 @@ export default function AdminDashboard() {
             <div className="pt-6 border-t mt-8">
               <Button
                 onClick={handleSave}
-                className="w-full h-14 text-lg font-bold bg-emerald-600 hover:bg-emerald-700 shadow-lg hover:shadow-xl transition-all"
+                disabled={isSavingActivity}
+                className={`w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all ${
+                  isSavingActivity
+                    ? "bg-emerald-400 cursor-not-allowed opacity-75"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                }`}
               >
-                {currentActivity.id
-                  ? "💾 Update Activity"
-                  : "✨ Create Activity"}
+                {isSavingActivity ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="flex gap-1">
+                      <div
+                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                        style={{ animationDelay: "0ms" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                        style={{ animationDelay: "150ms" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                        style={{ animationDelay: "300ms" }}
+                      ></div>
+                    </div>
+                    <span>Uploading...</span>
+                  </div>
+                ) : currentActivity.id ? (
+                  "💾 Update Activity"
+                ) : (
+                  "✨ Create Activity"
+                )}
               </Button>
             </div>
           </div>
