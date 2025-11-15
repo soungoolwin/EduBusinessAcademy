@@ -375,8 +375,7 @@ export default function InvestorApplicationPage() {
 
                 <div className="space-y-4">
                   <Label className="text-base">
-                    Type of Partner/Investor{" "}
-                    <span className="text-red-500">*</span>
+                    Type of Partner <span className="text-red-500">*</span>
                   </Label>
                   <p className="text-sm text-gray-600">Select all that apply</p>
 
@@ -394,7 +393,7 @@ export default function InvestorApplicationPage() {
                         htmlFor="financialInvestor"
                         className="font-normal cursor-pointer"
                       >
-                        Financial Investor (Provide Money)
+                        Collaborator
                       </Label>
                     </div>
 
@@ -502,7 +501,7 @@ export default function InvestorApplicationPage() {
                   <Textarea
                     id="investmentModel"
                     name="investmentModel"
-                    placeholder="E.g., Seed Funding, Mentoring, Strategic Partnership"
+                    placeholder="E.g., Mentoring, Strategic Partnership"
                     rows={4}
                     value={formData.investmentModel}
                     onChange={handleInputChange}
