@@ -159,7 +159,7 @@ export default function InvestorApplicationPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Become an Investor or Partner
+            Become an Partner
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Join us in shaping the future of education. Fill out the form below
